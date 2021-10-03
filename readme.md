@@ -1,5 +1,6 @@
 # Solve 99problems with palatable/lambda library 
 
-- https://github.com/shekhargulati/99-problems/tree/master/java8
-- https://github.com/palatable/lambda
-- https://gitter.im/palatable/lambda
+- 99 problems: https://github.com/shekhargulati/99-problems/tree/master/java8
+- lambda library: https://github.com/palatable/lambda
+- lambda api javadoc: https://palatable.github.io/lambda/javadoc/
+- lambda gitter: https://gitter.im/palatable/lambda
