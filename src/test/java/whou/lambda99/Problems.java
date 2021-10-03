@@ -8,12 +8,16 @@ import com.jnape.palatable.lambda.functions.Fn2;
 import com.jnape.palatable.lambda.functions.Fn3;
 import com.jnape.palatable.lambda.functions.builtin.fn1.*;
 import com.jnape.palatable.lambda.functions.builtin.fn2.*;
+import com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft;
+import com.jnape.palatable.lambda.functions.builtin.fn3.FoldRight;
 import com.jnape.palatable.lambda.functions.builtin.fn4.IfThenElse;
 import com.jnape.palatable.lambda.functions.recursion.RecursiveResult;
 import com.jnape.palatable.lambda.functions.recursion.Trampoline;
 import com.jnape.palatable.lambda.functions.specialized.Predicate;
+import com.jnape.palatable.lambda.functor.builtin.Lazy;
 import com.jnape.palatable.lambda.monoid.builtin.Concat;
 import com.jnape.palatable.lambda.semigroup.builtin.Max;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -31,7 +35,7 @@ public class Problems {
 
     @Test
     void test01() {
-        assertThat(p01(List.of(1,2,3))).isEqualTo(Maybe.maybe(3));
+        assertThat(p01(List.of(1, 2, 3))).isEqualTo(Maybe.maybe(3));
         assertThat(p01(List.of())).isEqualTo(Maybe.nothing());
     }
 
@@ -41,29 +45,29 @@ public class Problems {
 
     @Test
     void test02() {
-        assertThat(p02(List.of(1,2,3))).containsExactly(2,3);
-        assertThat(p02(List.of(1,2))).containsExactly(1,2);
+        assertThat(p02(List.of(1, 2, 3))).containsExactly(2, 3);
+        assertThat(p02(List.of(1, 2))).containsExactly(1, 2);
         assertThat(p02(List.of(1))).containsExactly(1);
     }
 
     private static <T> Maybe<T> p03(Iterable<T> as, int k) {
-        if (k < 1){
+        if (k < 1) {
             return Maybe.nothing();
         }
 
-        return Drop.<T>drop(k-1).fmap(Head.head()).apply(as);
+        return Drop.<T>drop(k - 1).fmap(Head.head()).apply(as);
     }
 
     @Test
     void test03() {
-        assertThat(p03(List.of(1,2,3),2)).isEqualTo(Maybe.maybe(2));
-        assertThat(p03(List.of(1,2,3), 4)).isEqualTo(Maybe.nothing());
-        assertThat(p03(List.of(1,2,3), -1)).isEqualTo(Maybe.nothing());
+        assertThat(p03(List.of(1, 2, 3), 2)).isEqualTo(Maybe.maybe(2));
+        assertThat(p03(List.of(1, 2, 3), 4)).isEqualTo(Maybe.nothing());
+        assertThat(p03(List.of(1, 2, 3), -1)).isEqualTo(Maybe.nothing());
     }
 
     private static <T> long p04(Iterable<T> as) {
         // do not use Size.Size
-        return FoldRight.foldRight((_unused, currentSize) -> currentSize.fmap(x -> x+1 ), Lazy.lazy(0L), as)
+        return FoldRight.foldRight((_unused, currentSize) -> currentSize.fmap(x -> x + 1), Lazy.lazy(0L), as)
                 .value();
     }
 
@@ -84,7 +88,7 @@ public class Problems {
 
     @Test
     void test05() {
-        Assertions.assertThat(p05(List.of(1,2,3))).containsExactly(3,2,1);
+        Assertions.assertThat(p05(List.of(1, 2, 3))).containsExactly(3, 2, 1);
     }
 
     private <T> boolean p06(Iterable<T> ts) {
@@ -93,9 +97,9 @@ public class Problems {
 
     @Test
     void test06() {
-        Assertions.assertThat(p06(List.of(1,2,3,2,1))).isTrue();
+        Assertions.assertThat(p06(List.of(1, 2, 3, 2, 1))).isTrue();
         Assertions.assertThat(p06(List.of())).isTrue();
-        Assertions.assertThat(p06(List.of(1,2,3,2,2))).isFalse();
+        Assertions.assertThat(p06(List.of(1, 2, 3, 2, 2))).isFalse();
     }
 
     private <T> Iterable<T> p07(Iterable<?> ts) {
@@ -103,29 +107,29 @@ public class Problems {
                 _nothing -> List.of(),
                 Into.into((head, rest) -> Concat.concat(
                         flattenOne(head),
-                        flatten(rest)
+                        p07(rest)
                 ))
         );
     }
 
     private <T> Iterable<T> flattenOne(T head) {
-        return head instanceof Iterable? flatten((Iterable<?>) head) : List.of(head);
+        return head instanceof Iterable ? p07((Iterable<?>) head) : List.of(head);
 
     }
 
     @Test
     void test07() {
-        assertThat(p07(List.of(1,2,3))).containsExactly(1,2,3);
-        assertThat(p07(List.of(1,List.of(2,3)))).containsExactly(1,2,3);
-        assertThat(p07(List.of(List.of(List.of(1)),List.of(2,3)))).containsExactly(1,2,3);
+        assertThat(p07(List.of(1, 2, 3))).containsExactly(1, 2, 3);
+        assertThat(p07(List.of(1, List.of(2, 3)))).containsExactly(1, 2, 3);
+        assertThat(p07(List.of(List.of(List.of(1)), List.of(2, 3)))).containsExactly(1, 2, 3);
     }
 
     private static <T> Iterable<T> p08(Iterable<T> ts) {
         return FoldLeft.<T, Iterable<T>>foldLeft((acc, element) ->
-                Last.last(acc).filter(element::equals).match(
-                        _different -> Snoc.snoc(element, acc),
-                        _same -> acc
-                ),
+                        Last.last(acc).filter(element::equals).match(
+                                _different -> Snoc.snoc(element, acc),
+                                _same -> acc
+                        ),
                 List.of(), ts);
     }
 
@@ -358,7 +362,7 @@ public class Problems {
     }
 
     private static Iterable<Integer> p22(int fromInclusive, int toInclusive) {
-return         TakeWhile.takeWhile(LTE.lte(toInclusive), Iterate.iterate(x -> x+1, fromInclusive));
+        return TakeWhile.takeWhile(LTE.lte(toInclusive), Iterate.iterate(x -> x + 1, fromInclusive));
 
     }
 
@@ -368,4 +372,12 @@ return         TakeWhile.takeWhile(LTE.lte(toInclusive), Iterate.iterate(x -> x+
     }
 
 
+    private static <T> Iterable<T> p23(Iterable<T> ts, int n) {
+        Long len = Size.size(ts);
+        if (n >= len) {
+            return ts;
+        }
+
+        Fn1<Iterable<T>, IO<T>> randomOne =  
+    }
 }
